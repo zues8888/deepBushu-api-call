@@ -1,19 +1,36 @@
-name: Daily API Call
+name: Daily Python Task # 定时任务
 on:
   schedule:
-
+            #┌───────────── 分钟 (0 - 59)
+            #│  ┌───────────── 小时 (0 - 23) UTC 时间
+            #│  │ ┌───────────── 日期 (1 - 31)
+            #│  │ │ ┌───────────── 月份 (1 - 12 或 JAN-DEC)
+            #│  │ │ │ ┌───────────── 星期 (0 - 6 或 SUN-SAT)
+            #│  │ │ │ │
+            #│  │ │ │ │
+            #*  * * * *
     - cron: '0 14 * * *'  # UTC时间14点=北京时间22点
-  workflow_dispatch:      # 支持手动触发
+  workflow_dispatch:      # 允许手动触发
 
-jobs:
-  execute-api:
+jobs: 
+  execute:
     runs-on: ubuntu-latest
     steps:
 
-    - name: Call API
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: Install dependencies
       run: |
-        curl -X POST "https://api.leafone.cn/api/misport?user=15197266646&password=shuge0517&step=34523" \
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
 
-        -H "Authorization: Bearer ${{ secrets.API_KEY }}" \
-
-        -d '{"param":"value"}'
+    - name: Execute script
+      run: python zepp_life.py
+      env: 
+        SERVER_CHAN_KEY: ${{ secrets.SERVER_CHAN_KEY }}  # 敏感数据存入Secrets
